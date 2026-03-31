@@ -47,7 +47,7 @@ pipeline {
                     echo 'Uygulama arka planda baslatiliyor...'
                     
                     // Backend'i başlat
-                    bat 'start /B venv\\Scripts\\python.exe -m uvicorn main:app --host 0.0.0.0 --port 8000'
+                    bat 'start /B venv\\Scripts\\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000'
                     
                     // Frontend'i baslat (npm run dev kullanarak direkt ayaga kaldiriyoruz)
                     dir('frontend') {
