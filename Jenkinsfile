@@ -5,7 +5,6 @@ pipeline {
         stage('Temizlik (Eski Surumleri Durdur)') {
             steps {
                 bat '''
-                :: 8000 (Backend) ve 5173 (Frontend) portlarını kullanan varsa kapat
                 echo Eski surecler temizleniyor...
                 taskkill /F /IM python.exe /T 2>nul || echo Python zaten calismiyor.
                 taskkill /F /IM node.exe /T 2>nul || echo Node zaten calismiyor.
@@ -33,7 +32,15 @@ pipeline {
         stage('Frontend Hazirlik') {
             steps {
                 dir('frontend') {
-                    bat 'npm install && npm run build'
+                    bat '''
+                    :: Eksik/hatalı modülleri temizlemek için radikal çözüm
+                    if exist node_modules (rd /s /q node_modules)
+                    if exist package-lock.json (del /f /q package-lock.json)
+                    
+                    echo Moduller bastan kuruluyor, bu biraz surebilir...
+                    npm install
+                    npm run build
+                    '''
                 }
             }
         }
@@ -42,16 +49,15 @@ pipeline {
             steps {
                 echo 'Uygulama arka planda baslatiliyor...'
                 
-                // Backend'i başlat (main.py dosyanın nerede olduğuna göre yolu gerekirse düzelt)
-                bat 'start /B venv\\Scripts\\python.exe -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload'
+                // Backend'i başlat
+                bat 'start /B venv\\Scripts\\python.exe -m uvicorn main:app --host 0.0.0.0 --port 8000'
                 
-                // Frontend'i başlat (React'ın build edilmiş halini 'serve' ile veya 'npm start' ile açabilirsin)
-                // Şimdilik geliştirme modunda (dev) açalım ki hemen görebil:
+                // Frontend'i baslat
                 dir('frontend') {
                     bat 'start /B npm run dev -- --host'
                 }
                 
-                echo '✅ MHRS Projesi su an canli! http://localhost:8000 (Backend) ve http://localhost:5173 (Frontend)'
+                echo '✅ MHRS Projesi su an canli! http://localhost:8000 ve http://localhost:5173'
             }
         }
     }
