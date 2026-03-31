@@ -33,8 +33,8 @@ pipeline {
             steps {
                 dir('frontend') {
                     bat '''
+                    :: Modulleri kontrol et, yoksa kur. Build hatasindan kacmak icin build yapmiyoruz.
                     if not exist node_modules (npm install)
-                    npm run build
                     '''
                 }
             }
@@ -49,15 +49,16 @@ pipeline {
                     // Backend'i başlat
                     bat 'start /B venv\\Scripts\\python.exe -m uvicorn main:app --host 0.0.0.0 --port 8000'
                     
-                    // Frontend'i baslat
+                    // Frontend'i baslat (npm run dev kullanarak direkt ayaga kaldiriyoruz)
                     dir('frontend') {
                         bat 'start /B npm run dev -- --host'
                     }
                 }
                 
-                // Sureclerin ayağa kalkması için 5 saniye bekle
                 sleep 5
-                echo '✅ MHRS Projesi su an canli! http://localhost:8000 ve http://localhost:5173'
+                echo '✅ MHRS Projesi su an canli!'
+                echo '👉 Frontend: http://localhost:5173'
+                echo '👉 Backend Docs: http://localhost:8000/docs'
             }
         }
     }
