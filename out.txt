@@ -1,0 +1,63 @@
+﻿.\venv\Scripts\python :
+ C:\Users\Kadir\.gemini
+\antigravity\scratch\mh
+rs-saas\venv\Lib\site-p
+ackages\requests\__init
+__.py:113: RequestsDepe
+ndencyWarning: urllib3 
+(2.6.3) or chardet (7.1
+.0)/charset_normalizer 
+(3.4.6) doesn't match a
+ supported version!
+At line:1 char:22
++ ... ONPATH="."; .\ven
+v\Scripts\python test_a
+ppointment_flow.py 2>&1
+ | Out ...
++                 ~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (C:\Users\Kadi   
+ r\...ported versio    
+n!:String) [], Rem    o
+teException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+  warnings.warn(
+Traceback (most recent 
+call last):
+  File "C:\Users\Kadir\
+.gemini\antigravity\scr
+atch\mhrs-saas\test_app
+ointment_flow.py", line
+ 95, in <module>
+    main()
+  File "C:\Users\Kadir\
+.gemini\antigravity\scr
+atch\mhrs-saas\test_app
+ointment_flow.py", line
+ 39, in main
+    print("\U0001f504 T
+est Verileri Haz²rlan²y
+or...")
+  File "C:\Users\Kadir\
+AppData\Local\Programs\
+Python\Python311\Lib\en
+codings\cp1254.py", lin
+e 19, in encode
+    return codecs.charm
+ap_encode(input,self.er
+rors,encoding_table)[0]
+           ^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'ch
+armap' codec can't enco
+de character '\U0001f50
+4' in position 0: chara
+cter maps to <undefined
+>

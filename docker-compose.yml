@@ -1,0 +1,115 @@
+version: "3.9"
+
+services:
+  # ────────────────────────────────────────
+  # MariaDB — Primary Relational Database
+  # ────────────────────────────────────────
+  mariadb:
+    image: mariadb:10.11
+    container_name: mhrs_mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpass}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-mhrs_db}
+      MYSQL_USER: ${MYSQL_USER:-mhrs_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-mhrs_password}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - mhrs_network
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ────────────────────────────────────────
+  # RabbitMQ — Message Broker
+  # ────────────────────────────────────────
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: mhrs_rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-mhrs_rabbit}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-rabbitpass}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-mhrs_vhost}
+    ports:
+      - "5672:5672"    # AMQP protocol
+      - "15672:15672"  # Management UI → http://localhost:15672
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - mhrs_network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  # ────────────────────────────────────────
+  # Elasticsearch — Search Engine
+  # ────────────────────────────────────────
+  elasticsearch:
+    image: elasticsearch:8.13.0
+    container_name: mhrs_elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false   # Dev mode — enable in production
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - cluster.name=mhrs-cluster
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - mhrs_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\\|yellow\"'"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+
+  # ────────────────────────────────────────
+  # MHRS FastAPI App (optional — uncomment for full stack)
+  # ────────────────────────────────────────
+  # app:
+  #   build: .
+  #   container_name: mhrs_app
+  #   restart: unless-stopped
+  #   env_file: .env
+  #   ports:
+  #     - "8000:8000"
+  #   depends_on:
+  #     mariadb:
+  #       condition: service_healthy
+  #     rabbitmq:
+  #       condition: service_healthy
+  #     elasticsearch:
+  #       condition: service_healthy
+  #   networks:
+  #     - mhrs_network
+  #   command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+# ────────────────────────────────────────
+# Named Volumes — Persistent across restarts
+# ────────────────────────────────────────
+volumes:
+  mariadb_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
+  elasticsearch_data:
+    driver: local
+
+# ────────────────────────────────────────
+# Custom Network
+# ────────────────────────────────────────
+networks:
+  mhrs_network:
+    driver: bridge

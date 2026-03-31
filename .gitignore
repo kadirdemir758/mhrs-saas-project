@@ -1,0 +1,41 @@
+# MHRS SaaS Git Ignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+
+# Environment
+.env
+*.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Testing
+.pytest_cache/
+test-results/
+htmlcov/
+.coverage
+*.cover
+
+# Docker
+*.tar.gz
+
+# Build artifacts
+*.log
+*.pid
+
+# OS
+.DS_Store
+Thumbs.db

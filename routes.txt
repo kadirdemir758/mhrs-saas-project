@@ -1,0 +1,36 @@
+/openapi.json {'GET', 'HEAD'}
+/docs {'GET', 'HEAD'}
+/docs/oauth2-redirect {'GET', 'HEAD'}
+/redoc {'GET', 'HEAD'}
+/api/v1/auth/register {'POST'}
+/api/v1/auth/verify {'POST'}
+/api/v1/auth/forgot-password {'POST'}
+/api/v1/auth/reset-password {'POST'}
+/api/v1/auth/login {'POST'}
+/api/v1/auth/me {'GET'}
+/api/v1/users/me {'GET'}
+/api/v1/users/me {'PATCH'}
+/api/v1/doctors/ {'GET'}
+/api/v1/doctors/ {'POST'}
+/api/v1/doctors/search {'GET'}
+/api/v1/doctors/me/appointments {'GET'}
+/api/v1/doctors/{doctor_id} {'GET'}
+/api/v1/doctors/clinics/list {'GET'}
+/api/v1/doctors/clinics {'POST'}
+/api/v1/appointments/booked-slots {'GET'}
+/api/v1/appointments/ {'POST'}
+/api/v1/appointments/me {'GET'}
+/api/v1/appointments/doctor/{doctor_id} {'GET'}
+/api/v1/appointments/{appointment_id}/cancel {'PATCH'}
+/api/v1/appointments/{appointment_id}/status {'PATCH'}
+/api/v1/appointments/{appointment_id}/download {'GET'}
+/api/v1/analyze/ {'POST'}
+/api/v1/slots/available {'GET'}
+/api/v1/locations/provinces {'GET'}
+/api/v1/locations/districts {'GET'}
+/api/v1/admin/stats/summary {'GET'}
+/api/v1/admin/stats/popular-clinics {'GET'}
+/api/v1/admin/stats/today {'GET'}
+/api/v1/admin/doctors {'POST'}
+/health {'GET'}
+/ {'GET'}

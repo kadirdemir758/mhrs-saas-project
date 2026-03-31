@@ -1,0 +1,17 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+pymysql
+cryptography
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt==3.2.2
+pydantic-settings
+elasticsearch
+pika
+emails
+aiosmtplib
+python-multipart
+alembic
+pytest
+httpx
