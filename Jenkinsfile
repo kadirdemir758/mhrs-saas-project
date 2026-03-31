@@ -3,6 +3,7 @@ pipeline {
     environment {
         // Jenkins'in süreçleri build bitince öldürmemesi için kritik ayar
         JENKINS_NODE_COOKIE = 'dontKillMe'
+        PYTHONUTF8 = '1'
     }
 
     stages {

@@ -24,7 +24,7 @@ settings = get_settings()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Runs startup logic before serving requests, teardown after."""
-    print("🚀 MHRS SaaS starting up...")
+    print(" MHRS SaaS starting up...")
     # 1. Create database tables
     create_all_tables()
     print("✅ Database tables verified.")
@@ -45,27 +45,27 @@ async def lifespan(app: FastAPI):
             )
             db.add(new_admin)
             db.commit()
-            print("✅ Super Admin seed successful (admin@mhrs.com / admin123).")
+            print(" Super Admin seed successful (admin@mhrs.com / admin123).")
         else:
-            print("ℹ️  Super Admin already exists.")
+            print("ℹ  Super Admin already exists.")
     except Exception as e:
-        print(f"⚠️  Failed to seed Super Admin: {e}")
+        print(f"  Failed to seed Super Admin: {e}")
     finally:
         db.close()
         
     # 3. Create Elasticsearch index
     try:
         create_doctor_index()
-        print("✅ Elasticsearch index verified.")
+        print(" Elasticsearch index verified.")
     except Exception as e:
-        print(f"⚠️  Elasticsearch not available: {e}")
+        print(f"  Elasticsearch not available: {e}")
     # 3. Register SQLAlchemy → ES event listeners
     try:
         register_es_events()
     except Exception as e:
-        print(f"⚠️  ES event listener registration failed: {e}")
+        print(f"  ES event listener registration failed: {e}")
     yield
-    print("🛑 MHRS SaaS shutting down.")
+    print(" MHRS SaaS shutting down.")
 
 
 # ── FastAPI App Factory ────────────────────────────────────────────────────────
