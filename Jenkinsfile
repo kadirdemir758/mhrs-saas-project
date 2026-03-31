@@ -33,12 +33,7 @@ pipeline {
             steps {
                 dir('frontend') {
                     bat '''
-                    :: Eksik/hatalı modülleri temizlemek için radikal çözüm
-                    if exist node_modules (rd /s /q node_modules)
-                    if exist package-lock.json (del /f /q package-lock.json)
-                    
-                    echo Moduller bastan kuruluyor, bu biraz surebilir...
-                    npm install
+                    if not exist node_modules (npm install)
                     npm run build
                     '''
                 }
@@ -47,16 +42,21 @@ pipeline {
 
         stage('🚀 CANLIYA AL (Deploy)') {
             steps {
-                echo 'Uygulama arka planda baslatiliyor...'
-                
-                // Backend'i başlat
-                bat 'start /B venv\\Scripts\\python.exe -m uvicorn main:app --host 0.0.0.0 --port 8000'
-                
-                // Frontend'i baslat
-                dir('frontend') {
-                    bat 'start /B npm run dev -- --host'
+                // Jenkins'in surecleri oldurmesini engelleyen kritik ayar
+                withEnv(['JENKINS_NODE_COOKIE=dontKillMe']) {
+                    echo 'Uygulama arka planda baslatiliyor...'
+                    
+                    // Backend'i başlat
+                    bat 'start /B venv\\Scripts\\python.exe -m uvicorn main:app --host 0.0.0.0 --port 8000'
+                    
+                    // Frontend'i baslat
+                    dir('frontend') {
+                        bat 'start /B npm run dev -- --host'
+                    }
                 }
                 
+                // Sureclerin ayağa kalkması için 5 saniye bekle
+                sleep 5
                 echo '✅ MHRS Projesi su an canli! http://localhost:8000 ve http://localhost:5173'
             }
         }
