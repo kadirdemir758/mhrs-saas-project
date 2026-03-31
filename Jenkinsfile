@@ -32,9 +32,9 @@ pipeline {
                 bat '''
                 "C:\\Users\\Kadir\\AppData\\Local\\Programs\\Python\\Python314\\python.exe" -m venv venv
                 
-                :: Eksik olan paketleri garantiye alıyoruz
+                :: Eksik kütüphaneleri yüklüyoruz
                 venv\\Scripts\\python.exe -m pip install --upgrade pip
-                venv\\Scripts\\pip.exe install email-validator
+                venv\\Scripts\\pip.exe install email-validator reportlab
                 venv\\Scripts\\pip.exe install -r requirements.txt
                 '''
                 dir('frontend') {
