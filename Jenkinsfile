@@ -1,61 +1,15 @@
-pipeline {
-    agent any
-    environment {
-        JENKINS_NODE_COOKIE = 'dontKillMe'
-    }
-
-    stages {
-        stage('Temizlik') {
-            steps {
-                bat '''
-                echo Eski surecler temizleniyor...
-                taskkill /F /IM python.exe /T 2>nul || echo Python zaten kapali.
-                taskkill /F /IM node.exe /T 2>nul || echo Node zaten kapali.
-                exit /b 0
-                '''
-            }
-        }
-
-        stage('Elasticsearch Kontrol') {
-            steps {
-                script {
-                    echo 'Elasticsearch ayaga kaldiriliyor (Docker)...'
-                    // Eğer Docker Desktop yüklüyse bu komut Elasticsearch'ü otomatik başlatır
-                    bat 'docker run -d --name elasticsearch -p 9200:9200 -e "discovery.type=single-node" -e "xpack.security.enabled=false" docker.elastic.co/elasticsearch/elasticsearch:8.12.0 2>nul || docker start elasticsearch'
-                }
-            }
-        }
-
-        stage('Backend & Frontend Hazirlik') {
+stage('Backend & Frontend Hazirlik') {
             steps {
                 bat '''
                 "C:\\Users\\Kadir\\AppData\\Local\\Programs\\Python\\Python314\\python.exe" -m venv venv
-                venv\\Scripts\\python.exe -m pip install -r requirements.txt
+                
+                :: Eksik olan kütüphaneyi ve gereksinimleri kuruyoruz
+                venv\\Scripts\\python.exe -m pip install --upgrade pip
+                venv\\Scripts\\pip.exe install email-validator
+                venv\\Scripts\\pip.exe install -r requirements.txt
                 '''
                 dir('frontend') {
                     bat 'if not exist node_modules (npm install)'
                 }
             }
         }
-
-        stage('🚀 CANLIYA AL (Deploy)') {
-            steps {
-                echo 'Uygulamalar baslatiliyor...'
-                
-                // Backend'i başlat ve hataları 'backend_hata.log' dosyasına yaz
-                bat 'start /B venv\\Scripts\\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000 > backend_hata.log 2>&1'
-                
-                dir('frontend') {
-                    bat 'start /B npm run dev -- --host'
-                }
-                
-                echo 'Sistemin oturmasi icin bekleniyor...'
-                sleep 15
-                
-                // BURASI KRİTİK: Eğer backend çöktüyse hatayı direkt Jenkins konsolunda göreceğiz
-                echo '--- BACKEND LOGLARI (HATA BURADA OLABİLİR) ---'
-                bat 'if exist backend_hata.log (type backend_hata.log)'
-            }
-        }
-    }
-}
