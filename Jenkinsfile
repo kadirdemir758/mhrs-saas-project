@@ -10,11 +10,13 @@ pipeline {
         
         stage('Backend Kurulumu') {
             steps {
-                // Windows'ta bat kullanılır ve venv yolu Scripts klasörüdür
                 bat '''
-                python -m venv venv
-                call venv\\Scripts\\activate
-                pip install -r requirements.txt
+                :: Python'u tam yoluyla çagırıyoruz
+                "C:\\Users\\Kadir\\AppData\\Local\\Programs\\Python\\Python314\\python.exe" -m venv venv
+                
+                :: Sanal ortamın içindeki Python ve pip'i direkt kullanarak is garantiye alıyoruz
+                venv\\Scripts\\python.exe -m pip install --upgrade pip
+                venv\\Scripts\\pip.exe install -r requirements.txt
                 '''
             }
         }
