@@ -1,64 +1,60 @@
 pipeline {
     agent any
+    environment {
+        JENKINS_NODE_COOKIE = 'dontKillMe'
+    }
 
     stages {
-        stage('Temizlik (Eski Surumleri Durdur)') {
+        stage('Temizlik') {
             steps {
                 bat '''
                 echo Eski surecler temizleniyor...
-                taskkill /F /IM python.exe /T 2>nul || echo Python zaten calismiyor.
-                taskkill /F /IM node.exe /T 2>nul || echo Node zaten calismiyor.
+                taskkill /F /IM python.exe /T 2>nul || echo Python zaten kapali.
+                taskkill /F /IM node.exe /T 2>nul || echo Node zaten kapali.
                 exit /b 0
                 '''
             }
         }
 
-        stage('GitHubdan Kodu Cek') {
+        stage('Elasticsearch Kontrol') {
             steps {
-                git branch: 'main', url: 'https://github.com/kadirdemir758/mhrs-saas-project.git'
+                script {
+                    echo 'Elasticsearch ayaga kaldiriliyor (Docker)...'
+                    // Eğer Docker Desktop yüklüyse bu komut Elasticsearch'ü otomatik başlatır
+                    bat 'docker run -d --name elasticsearch -p 9200:9200 -e "discovery.type=single-node" -e "xpack.security.enabled=false" docker.elastic.co/elasticsearch/elasticsearch:8.12.0 2>nul || docker start elasticsearch'
+                }
             }
         }
-        
-        stage('Backend Hazirlik') {
+
+        stage('Backend & Frontend Hazirlik') {
             steps {
                 bat '''
                 "C:\\Users\\Kadir\\AppData\\Local\\Programs\\Python\\Python314\\python.exe" -m venv venv
-                venv\\Scripts\\python.exe -m pip install --upgrade pip
-                venv\\Scripts\\pip.exe install -r requirements.txt
+                venv\\Scripts\\python.exe -m pip install -r requirements.txt
                 '''
-            }
-        }
-        
-        stage('Frontend Hazirlik') {
-            steps {
                 dir('frontend') {
-                    bat '''
-                    :: Modulleri kontrol et, yoksa kur. Build hatasindan kacmak icin build yapmiyoruz.
-                    if not exist node_modules (npm install)
-                    '''
+                    bat 'if not exist node_modules (npm install)'
                 }
             }
         }
 
         stage('🚀 CANLIYA AL (Deploy)') {
             steps {
-                // Jenkins'in surecleri oldurmesini engelleyen kritik ayar
-                withEnv(['JENKINS_NODE_COOKIE=dontKillMe']) {
-                    echo 'Uygulama arka planda baslatiliyor...'
-                    
-                    // Backend'i başlat
-                    bat 'start /B venv\\Scripts\\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000'
-                    
-                    // Frontend'i baslat (npm run dev kullanarak direkt ayaga kaldiriyoruz)
-                    dir('frontend') {
-                        bat 'start /B npm run dev -- --host'
-                    }
+                echo 'Uygulamalar baslatiliyor...'
+                
+                // Backend'i başlat ve hataları 'backend_hata.log' dosyasına yaz
+                bat 'start /B venv\\Scripts\\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000 > backend_hata.log 2>&1'
+                
+                dir('frontend') {
+                    bat 'start /B npm run dev -- --host'
                 }
                 
-                sleep 5
-                echo '✅ MHRS Projesi su an canli!'
-                echo '👉 Frontend: http://localhost:5173'
-                echo '👉 Backend Docs: http://localhost:8000/docs'
+                echo 'Sistemin oturmasi icin bekleniyor...'
+                sleep 15
+                
+                // BURASI KRİTİK: Eğer backend çöktüyse hatayı direkt Jenkins konsolunda göreceğiz
+                echo '--- BACKEND LOGLARI (HATA BURADA OLABİLİR) ---'
+                bat 'if exist backend_hata.log (type backend_hata.log)'
             }
         }
     }
