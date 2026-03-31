@@ -10,10 +10,10 @@ pipeline {
         
         stage('Backend Kurulumu') {
             steps {
-                // Linux/Docker ortamında sh komutları ve bin/activate kullanılır
-                sh '''
-                python3 -m venv venv
-                . venv/bin/activate
+                // Windows'ta bat kullanılır ve venv yolu Scripts klasörüdür
+                bat '''
+                python -m venv venv
+                call venv\\Scripts\\activate
                 pip install -r requirements.txt
                 '''
             }
@@ -22,7 +22,7 @@ pipeline {
         stage('Frontend Derleme') {
             steps {
                 dir('frontend') {
-                    sh '''
+                    bat '''
                     npm install
                     npm run build
                     '''
